@@ -40,7 +40,12 @@ from langchain_core.messages import (
     SystemMessage,
 )
 from langchain_core.embeddings import Embeddings
-from sentence_transformers import SentenceTransformer
+try:
+    from sentence_transformers import SentenceTransformer
+    _SENTENCE_TRANSFORMERS_AVAILABLE = True
+except ImportError:
+    SentenceTransformer = None  # type: ignore
+    _SENTENCE_TRANSFORMERS_AVAILABLE = False
 from pydantic import ConfigDict
 
 
@@ -590,7 +595,12 @@ class AsyncAIChatReplacement:
         self.chat = AsyncAIChatReplacement._Chat(wrapper)
 
 
-from browser_use.llm import ChatOllama, ChatOpenRouter, ChatGoogle, ChatAnthropic, ChatGroq, ChatOpenAI
+try:
+    from browser_use.llm import ChatOllama, ChatOpenRouter, ChatGoogle, ChatAnthropic, ChatGroq, ChatOpenAI
+    _BROWSER_USE_LLM_AVAILABLE = True
+except ImportError:
+    ChatOllama = ChatOpenRouter = ChatGoogle = ChatAnthropic = ChatGroq = ChatOpenAI = None  # type: ignore
+    _BROWSER_USE_LLM_AVAILABLE = False
 
 class BrowserCompatibleChatWrapper(ChatOpenRouter):
     """
