@@ -602,7 +602,8 @@ except ImportError:
     ChatOllama = ChatOpenRouter = ChatGoogle = ChatAnthropic = ChatGroq = ChatOpenAI = None  # type: ignore
     _BROWSER_USE_LLM_AVAILABLE = False
 
-class BrowserCompatibleChatWrapper(ChatOpenRouter):
+_BrowserBase = ChatOpenRouter if _BROWSER_USE_LLM_AVAILABLE else object
+class BrowserCompatibleChatWrapper(_BrowserBase):
     """
     A wrapper for browser agent that can filter/sanitize messages
     before sending them to the LLM.
