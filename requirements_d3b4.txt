@@ -42,6 +42,9 @@ langchain
 langchain-community
 langchain-core
 langchain-text-splitters
+langchain-classic
+imapclient
+inputimeout
 langgraph
 langgraph-checkpoint
 langgraph-prebuilt
