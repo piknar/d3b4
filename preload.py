@@ -39,7 +39,7 @@ async def preload():
 
         # async tasks to preload
         tasks = [
-            preload_embedding(),
+            # preload_embedding(),  # disabled: no local embedding model in d3b4
             # preload_whisper(),
             # preload_kokoro()
         ]
