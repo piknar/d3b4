@@ -118,6 +118,8 @@ class RecallMemories(Extension):
 
         # get memory database
         db = await Memory.get(self.agent)
+        if db is None:
+            return
 
         # search for general memories and fragments
         memories = await db.search_similarity_threshold(
