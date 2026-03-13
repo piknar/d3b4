@@ -63,6 +63,9 @@ class Memory:
 
     @staticmethod
     async def get(agent: Agent):
+        # d3b4: skip VectorDB init if memory recall is disabled
+        if not agent.config.memory_recall_enabled:
+            return None
         memory_subdir = get_agent_memory_subdir(agent)
         if Memory.index.get(memory_subdir) is None:
             log_item = agent.context.log.log(
