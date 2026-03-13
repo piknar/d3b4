@@ -69,20 +69,28 @@ class Memory:
                 type="util",
                 heading=f"Initializing VectorDB in '/{memory_subdir}'",
             )
-            db, created = Memory.initialize(
-                log_item,
-                agent.config.embeddings_model,
-                memory_subdir,
-                False,
-            )
-            Memory.index[memory_subdir] = db
-            wrap = Memory(db, memory_subdir=memory_subdir)
-            knowledge_subdirs = get_knowledge_subdirs_by_memory_subdir(
-                memory_subdir, agent.config.knowledge_subdirs or []
-            )
-            if knowledge_subdirs:
-                await wrap.preload_knowledge(log_item, knowledge_subdirs, memory_subdir)
-            return wrap
+            try:
+                db, created = Memory.initialize(
+                    log_item,
+                    agent.config.embeddings_model,
+                    memory_subdir,
+                    False,
+                )
+                Memory.index[memory_subdir] = db
+                wrap = Memory(db, memory_subdir=memory_subdir)
+                knowledge_subdirs = get_knowledge_subdirs_by_memory_subdir(
+                    memory_subdir, agent.config.knowledge_subdirs or []
+                )
+                if knowledge_subdirs:
+                    await wrap.preload_knowledge(log_item, knowledge_subdirs, memory_subdir)
+                return wrap
+            except Exception as e:
+                import logging
+                logging.warning(f"VectorDB init failed (memory disabled): {e}")
+                if log_item:
+                    log_item.stream(progress=f"
+VectorDB unavailable: {e}")
+                return None
         else:
             return Memory(
                 db=Memory.index[memory_subdir],

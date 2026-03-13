@@ -6,6 +6,9 @@ class MemoryDelete(Tool):
 
     async def execute(self, ids="", **kwargs):
         db = await Memory.get(self.agent)
+        if db is None:
+            return self.tool_response("Memory is unavailable (no embedding model configured).")
+
         ids = [id.strip() for id in ids.split(",") if id.strip()]
         dels = await db.delete_documents_by_ids(ids=ids)
 

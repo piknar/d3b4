@@ -7,6 +7,9 @@ class MemoryForget(Tool):
 
     async def execute(self, query="", threshold=DEFAULT_THRESHOLD, filter="", **kwargs):
         db = await Memory.get(self.agent)
+        if db is None:
+            return self.tool_response("Memory is unavailable (no embedding model configured).")
+
         dels = await db.delete_documents_by_query(query=query, threshold=threshold, filter=filter)
 
         result = self.agent.read_prompt("fw.memories_deleted.md", memory_count=len(dels))

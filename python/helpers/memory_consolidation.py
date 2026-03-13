@@ -133,6 +133,7 @@ class MemoryConsolidator:
                 )
             try:
                 db = await Memory.get(self.agent)
+            if db is None: return
                 if 'timestamp' not in metadata:
                     metadata['timestamp'] = self._get_timestamp()
                 memory_id = await db.insert_text(new_memory, metadata)
@@ -161,6 +162,7 @@ class MemoryConsolidator:
             # Filter out None values and ensure all IDs are strings
             memory_ids_to_check = [str(id) for id in memory_ids_to_check if id is not None]
             db = await Memory.get(self.agent)
+            if db is None: return
             still_existing = db.db.get_by_ids(memory_ids_to_check)
             existing_ids = {doc.metadata.get('id') for doc in still_existing}
 
@@ -185,6 +187,7 @@ class MemoryConsolidator:
                 )
             try:
                 db = await Memory.get(self.agent)
+            if db is None: return
                 if 'timestamp' not in metadata:
                     metadata['timestamp'] = self._get_timestamp()
                 memory_id = await db.insert_text(new_memory, metadata)
@@ -219,6 +222,7 @@ class MemoryConsolidator:
                 )
             try:
                 db = await Memory.get(self.agent)
+            if db is None: return
                 if 'timestamp' not in metadata:
                     metadata['timestamp'] = self._get_timestamp()
                 memory_id = await db.insert_text(new_memory, metadata)
@@ -538,6 +542,7 @@ class MemoryConsolidator:
 
         try:
             db = await Memory.get(self.agent)
+            if db is None: return
 
             # Retrieve metadata from memories being consolidated to preserve important fields
             consolidated_metadata = await self._gather_consolidated_metadata(db, result, original_metadata)

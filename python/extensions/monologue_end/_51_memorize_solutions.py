@@ -35,6 +35,7 @@ class MemorizeSolutions(Extension):
             set = settings.get_settings()
 
             db = await Memory.get(self.agent)
+            if db is None: return
 
             # get system message and chat history for util llm
             system = self.agent.read_prompt("memory.solutions_sum.sys.md")
