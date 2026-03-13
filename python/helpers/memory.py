@@ -88,8 +88,8 @@ class Memory:
                 import logging
                 logging.warning(f"VectorDB init failed (memory disabled): {e}")
                 if log_item:
-                    log_item.stream(progress=f"
-VectorDB unavailable: {e}")
+                    log_item.stream(progress="
+VectorDB unavailable: " + str(e))
                 return None
         else:
             return Memory(
