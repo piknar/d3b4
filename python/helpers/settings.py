@@ -547,7 +547,7 @@ def get_default_settings() -> Settings:
         browser_model_rl_output=get_default_value("browser_model_rl_output", 0),
         browser_model_kwargs=get_default_value("browser_model_kwargs", {}),
         browser_http_headers=get_default_value("browser_http_headers", {}),
-        memory_recall_enabled=get_default_value("memory_recall_enabled", True),
+        memory_recall_enabled=get_default_value("memory_recall_enabled", False),  # d3b4: disabled by default, no local embed model
         memory_recall_delayed=get_default_value("memory_recall_delayed", False),
         memory_recall_interval=get_default_value("memory_recall_interval", 3),
         memory_recall_history_len=get_default_value("memory_recall_history_len", 10000),
