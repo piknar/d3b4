@@ -63,8 +63,8 @@ class Memory:
 
     @staticmethod
     async def get(agent: Agent):
-        # d3b4: skip VectorDB init if memory recall is disabled
-        if not agent.config.memory_recall_enabled:
+        # d3b4: skip VectorDB init if memory recall is disabled (use getattr for backward compat)
+        if not getattr(agent.config, "memory_recall_enabled", False):
             return None
         memory_subdir = get_agent_memory_subdir(agent)
         if Memory.index.get(memory_subdir) is None:
