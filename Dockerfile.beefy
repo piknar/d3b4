@@ -52,12 +52,14 @@ RUN /d3b4/.venv/bin/pip install --no-cache-dir -r /tmp/requirements_d3b4_beefy.t
 
 # Pre-download the embedding model at build time (bakes it into the image)
 # This avoids cold-start download on first run and works offline
-RUN /d3b4/.venv/bin/python -c "
+RUN <<EOF
+/d3b4/.venv/bin/python -c '
 from sentence_transformers import SentenceTransformer
-print('Pre-downloading all-MiniLM-L6-v2 embedding model...')
-model = SentenceTransformer('all-MiniLM-L6-v2')
-print('Model downloaded and cached successfully.')
-"
+print("Pre-downloading all-MiniLM-L6-v2 embedding model...")
+model = SentenceTransformer("all-MiniLM-L6-v2")
+print("Model downloaded and cached successfully.")
+'
+EOF
 
 # Copy application code
 COPY . /d3b4/
