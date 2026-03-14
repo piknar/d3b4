@@ -1,0 +1,69 @@
+name: Build and Push d3b4-beefy to Docker Hub
+
+on:
+  push:
+    branches:
+      - beefy
+    tags:
+      - 'beefy-v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: piknar/d3b4
+          tags: |
+            type=raw,value=beefy-latest,enable={{is_default_branch}}
+            type=match,pattern=beefy-v(.*),group=1,prefix=beefy-
+            type=sha,prefix=beefy-sha-
+
+      - name: Build and push beefy image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.beefy
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Smoke test beefy image
+        run: |
+          docker pull piknar/d3b4:beefy-latest
+          docker run -d --name d3b4-beefy-smoke -p 8080:8080 -e PORT=8080 piknar/d3b4:beefy-latest
+          echo "Waiting 40s for startup (torch + model load)..."
+          sleep 40
+          if ! docker ps | grep d3b4-beefy-smoke; then
+            echo "❌ Beefy container crashed!"
+            docker logs d3b4-beefy-smoke
+            exit 1
+          fi
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/ --max-time 15 || echo "000")
+          echo "HTTP status: $STATUS"
+          if [ "$STATUS" = "000" ]; then
+            echo "❌ Port 8080 not responding"
+            docker logs d3b4-beefy-smoke
+            exit 1
+          fi
+          echo "✅ d3b4-beefy smoke test passed (HTTP $STATUS)"
+          docker rm -f d3b4-beefy-smoke

@@ -532,8 +532,8 @@ def get_default_settings() -> Settings:
         util_model_rl_requests=get_default_value("util_model_rl_requests", 0),
         util_model_rl_input=get_default_value("util_model_rl_input", 0),
         util_model_rl_output=get_default_value("util_model_rl_output", 0),
-        embed_model_provider=get_default_value("embed_model_provider", "openai"),
-        embed_model_name=get_default_value("embed_model_name", "text-embedding-3-small"),
+        embed_model_provider=get_default_value("embed_model_provider", "huggingface"),
+        embed_model_name=get_default_value("embed_model_name", "sentence-transformers/all-MiniLM-L6-v2"),
         embed_model_api_base=get_default_value("embed_model_api_base", ""),
         embed_model_kwargs=get_default_value("embed_model_kwargs", {}),
         embed_model_rl_requests=get_default_value("embed_model_rl_requests", 0),
@@ -547,7 +547,7 @@ def get_default_settings() -> Settings:
         browser_model_rl_output=get_default_value("browser_model_rl_output", 0),
         browser_model_kwargs=get_default_value("browser_model_kwargs", {}),
         browser_http_headers=get_default_value("browser_http_headers", {}),
-        memory_recall_enabled=get_default_value("memory_recall_enabled", False),  # d3b4: disabled by default, no local embed model
+        memory_recall_enabled=get_default_value("memory_recall_enabled", True),  # d3b4-beefy: enabled by default, local embed model included
         memory_recall_delayed=get_default_value("memory_recall_delayed", False),
         memory_recall_interval=get_default_value("memory_recall_interval", 3),
         memory_recall_history_len=get_default_value("memory_recall_history_len", 10000),

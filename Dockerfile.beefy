@@ -1,0 +1,87 @@
+# d3b4-beefy - Born of deby-lite, built for 1GB+ RAM deployments
+# Includes: torch CPU + sentence-transformers (local memory embeddings)
+# Targets: Fly.io, Oracle Cloud Always Free, any 1GB+ host
+FROM debian:trixie-slim
+
+LABEL maintainer="piknar <piknar@gmail.com>"
+LABEL description="d3b4-beefy - Persistent memory AI agent, 1GB+ RAM"
+LABEL version="0.1.0"
+LABEL org.opencontainers.image.source="https://github.com/piknar/d3b4"
+LABEL org.opencontainers.image.licenses="MIT"
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# System dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-venv \
+    python3.13-dev \
+    python3-pip \
+    build-essential \
+    gcc \
+    g++ \
+    pkg-config \
+    git \
+    curl \
+    wget \
+    ca-certificates \
+    bash \
+    procps \
+    nano \
+    unzip \
+    zip \
+    tar \
+    rsync \
+    jq \
+    libxml2-dev \
+    libxslt1-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /d3b4
+
+# Create venv with Python 3.13
+RUN python3.13 -m venv /d3b4/.venv && \
+    /d3b4/.venv/bin/pip install --upgrade pip setuptools wheel
+
+# Copy beefy requirements first for layer caching
+COPY requirements_d3b4_beefy.txt /tmp/requirements_d3b4_beefy.txt
+
+# Install all dependencies including torch CPU + sentence-transformers
+RUN /d3b4/.venv/bin/pip install --no-cache-dir -r /tmp/requirements_d3b4_beefy.txt
+
+# Pre-download the embedding model at build time (bakes it into the image)
+# This avoids cold-start download on first run and works offline
+RUN /d3b4/.venv/bin/python -c "
+from sentence_transformers import SentenceTransformer
+print('Pre-downloading all-MiniLM-L6-v2 embedding model...')
+model = SentenceTransformer('all-MiniLM-L6-v2')
+print('Model downloaded and cached successfully.')
+"
+
+# Copy application code
+COPY . /d3b4/
+
+# Set environment variables
+ENV A0_ROOT=/d3b4
+ENV PYTHONPATH=/d3b4
+ENV VIRTUAL_ENV=/d3b4/.venv
+ENV PATH="/d3b4/.venv/bin:$PATH"
+ENV IS_DOCKERIZED=true
+ENV SHELL_INTERFACE=local
+ENV A0_SET_SHELL_INTERFACE=local
+ENV A0_SET_CODE_EXEC_SSH_ENABLED=false
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+# Beefy defaults - enable memory with local embeddings
+ENV A0_SET_embed_model_provider=huggingface
+ENV A0_SET_embed_model_name=sentence-transformers/all-MiniLM-L6-v2
+ENV A0_SET_memory_recall_enabled=true
+
+# Startup script
+COPY start_d3b4.sh /start_d3b4.sh
+RUN chmod +x /start_d3b4.sh
+
+EXPOSE 8080
+
+ENTRYPOINT ["/start_d3b4.sh"]
