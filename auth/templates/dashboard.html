@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>d3b4 - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .header h1 {
+            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.8em;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .username {
+            color: #b8c5d6;
+        }
+        .logout-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+            color: #fff;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .logout-btn:hover {
+            transform: translateY(-2px);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .card h2 {
+            color: #e94560;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            color: #b8c5d6;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            color: #fff;
+            font-size: 1em;
+        }
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+            font-family: monospace;
+        }
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .message.success {
+            background: rgba(78, 205, 196, 0.2);
+            border: 1px solid #4ecdc4;
+            color: #4ecdc4;
+            display: block;
+        }
+        .message.error {
+            background: rgba(233, 69, 96, 0.2);
+            border: 1px solid #e94560;
+            color: #e94560;
+            display: block;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            color: #b8c5d6;
+        }
+        .info-value {
+            color: #fff;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>d3b4 Dashboard</h1>
+        <div class="user-info">
+            <span class="username" id="currentUser">Loading...</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>⚙️ Settings</h2>
+            <div id="settingsMessage" class="message"></div>
+            <div class="form-group">
+                <label for="settingsJson">Settings (JSON format)</label>
+                <textarea id="settingsJson" placeholder='{"theme": "dark", "language": "en"}'></textarea>
+            </div>
+            <button onclick="updateSettings()">Update Settings</button>
+        </div>
+
+        <div class="card">
+            <h2>🔐 Change Credentials</h2>
+            <div id="credentialsMessage" class="message"></div>
+            <div class="form-group">
+                <label for="newUsername">New Username</label>
+                <input type="text" id="newUsername" placeholder="Enter new username">
+            </div>
+            <div class="form-group">
+                <label for="newPassword">New Password</label>
+                <input type="password" id="newPassword" placeholder="Enter new password">
+            </div>
+            <button onclick="updateCredentials()">Update Credentials</button>
+        </div>
+
+        <div class="card">
+            <h2>ℹ️ System Info</h2>
+            <div class="info-row">
+                <span class="info-label">Database Location</span>
+                <span class="info-value">/d3b4/usr/workdir/credentials.db</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">API Endpoint</span>
+                <span class="info-value">/api/settings</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Version</span>
+                <span class="info-value">1.0.0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load current user and settings on page load
+        async function loadUserData() {
+            try {
+                const response = await fetch('/api/current_user');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('currentUser').textContent = data.username;
+                    document.getElementById('settingsJson').value = JSON.stringify(data.settings, null, 2);
+                } else {
+                    window.location.href = '/login';
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        async function updateSettings() {
+            const settingsJson = document.getElementById('settingsJson').value;
+            try {
+                const settings = JSON.parse(settingsJson);
+                const response = await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(settings)
+                });
+                const data = await response.json();
+                showMessage('settingsMessage', data.success ? 'Settings updated!' : 'Failed to update settings', data.success);
+            } catch (error) {
+                showMessage('settingsMessage', 'Invalid JSON format', false);
+            }
+        }
+
+        async function updateCredentials() {
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('newPassword').value;
+            
+            if (!username || !password) {
+                showMessage('credentialsMessage', 'Please fill in both fields', false);
+                return;
+            }
+
+            const response = await fetch('/api/credentials', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await response.json();
+            if (data.success) {
+                showMessage('credentialsMessage', 'Credentials updated! Please login again.', true);
+                document.getElementById('currentUser').textContent = username;
+                setTimeout(() => logout(), 2000);
+            } else {
+                showMessage('credentialsMessage', 'Failed to update credentials', false);
+            }
+        }
+
+        async function logout() {
+            await fetch('/logout', { method: 'POST' });
+            window.location.href = '/login';
+        }
+
+        function showMessage(elementId, message, isSuccess) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = 'message ' + (isSuccess ? 'success' : 'error');
+            setTimeout(() => element.className = 'message', 3000);
+        }
+
+        // Load data on page load
+        loadUserData();
+    </script>
+</body>
+</html>
