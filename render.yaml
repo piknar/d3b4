@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: d3b4
+    runtime: docker
+    repo: https://github.com/piknar/d3b4
+    branch: main
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: A0_SET_embed_model_provider
+        value: huggingface
+      - key: WEBUI_AUTH
+        value: "true"
+    healthCheckPath: /health
+    autoDeploy: true
