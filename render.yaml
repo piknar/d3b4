@@ -8,9 +8,19 @@ services:
     envVars:
       - key: PORT
         value: 8080
+      - key: A0_SET_chat_model_provider
+        value: venice
+      - key: A0_SET_chat_model_name
+        value: claude-sonnet-4-6
+      - key: A0_SET_util_model_provider
+        value: venice
+      - key: A0_SET_util_model_name
+        value: kimi-k2-5
+      - key: A0_SET_browser_model_provider
+        value: venice
+      - key: A0_SET_browser_model_name
+        value: claude-sonnet-4-6
       - key: A0_SET_embed_model_provider
         value: huggingface
-      - key: WEBUI_AUTH
-        value: "true"
     healthCheckPath: /health
     autoDeploy: true
